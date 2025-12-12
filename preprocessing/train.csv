@@ -1,0 +1,6 @@
+PassengerId,HomePlanet,CryoSleep,Cabin,Destination,Age,VIP,RoomService,FoodCourt,ShoppingMall,Spa,VRDeck,Name,Transported
+0001_01,Earth,False,B/0/P,TRAPPIST-1e,39,False,0,0,0,0,0,John Doe,True
+0002_01,Mars,True,F/33/S,55 Cancri e,24,False,109,9,25,549,44,Alice Johnson,False
+0003_01,Europa,False,A/23/S,PSO J318.5-22,58,True,43,357,0,0,0,Michael Brown,True
+0004_01,Earth,False,G/12/P,TRAPPIST-1e,20,False,0,0,5,0,0,Sarah Connor,False
+0005_01,Mars,True,D/45/S,55 Cancri e,45,False,89,0,10,30,5,Tony Stark,True

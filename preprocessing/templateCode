@@ -1,0 +1,136 @@
+# =========================
+# Modul Implementasi Pra-pemrosesan dan Analisis Data
+# Studi Kasus: Spaceship Titanic
+# =========================
+
+# BAB 1: Persiapan Awal
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+
+sns.set_theme(style="whitegrid")
+print("Pustaka berhasil diimpor!\n")
+
+# =====================================
+# BAB 1.2: Memuat Dataset
+# =====================================
+try:
+    train_df = pd.read_csv("train.csv")
+    test_df = pd.read_csv("test.csv")
+
+    print("Data Latih (Train) - 5 baris pertama:")
+    print(train_df.head(), "\n")
+
+    print("Data Uji (Test) - 5 baris pertama:")
+    print(test_df.head(), "\n")
+
+except FileNotFoundError:
+    print("⚠️ Pastikan file 'train.csv' dan 'test.csv' ada di direktori yang sama.")
+    exit()
+
+# =====================================
+# BAB 2: Pemahaman Data
+# =====================================
+
+train_df = pd.read_csv("train.csv")
+test_df = pd.read_csv("test.csv")
+
+print("Informasi Data Latih:")
+display(train_df.info())
+print("\nJumlah nilai hilang di setiap kolom:")
+display(train_df.isnull().sum())
+print(f"Jumlah duplikat: {train_df.duplicated().sum()}")
+
+sns.countplot(x='Transported', data=train_df)
+plt.title('Distribusi Variabel Target (Transported)')
+plt.show()
+
+
+# =====================================
+# BAB 3: Implementasi Pra-pemrosesan
+# =====================================
+df = train_df.copy()
+
+# Feature Engineering
+df[['Deck', 'Num', 'Side']] = df['Cabin'].str.split('/', expand=True)
+spending_cols = ['RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
+df['Total_Spending'] = df[spending_cols].sum(axis=1)
+df['Family_Name'] = df['Name'].apply(lambda x: str(x).split()[-1] if pd.notna(x) else 'Unknown')
+
+print("Contoh hasil rekayasa fitur:")
+print(df[['Cabin', 'Deck', 'Num', 'Side', 'Total_Spending', 'Name', 'Family_Name']].head(), "\n")
+
+# Data Cleaning
+for col in ['Age', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck', 'Total_Spending']:
+    df[col].fillna(df[col].median(), inplace=True)
+
+for col in ['HomePlanet', 'CryoSleep', 'Destination', 'VIP', 'Deck', 'Side']:
+    df[col].fillna(df[col].mode()[0], inplace=True)
+
+print("Cek nilai hilang setelah imputasi:\n", df.isnull().sum(), "\n")
+
+# Data Transformation - Scaling
+scaler = StandardScaler()
+numeric_cols = ['Age', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck', 'Total_Spending']
+df[numeric_cols] = scaler.fit_transform(df[numeric_cols])
+
+# Encoding
+for col in ['CryoSleep', 'VIP', 'Transported']:
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+
+df = pd.get_dummies(df, columns=['HomePlanet', 'Destination', 'Deck', 'Side'], drop_first=True)
+
+print("Data setelah encoding dan scaling:")
+print(df.head(), "\n")
+
+# =====================================
+# BAB 4: Analisis Data Eksploratif (EDA)
+# =====================================
+df_viz = train_df.copy()
+df_viz['Age'].fillna(df_viz['Age'].median(), inplace=True)
+df_viz['Total_Spending'] = df_viz[spending_cols].sum(axis=1)
+
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='Transported', y='Age', data=df_viz)
+plt.title('Boxplot Usia berdasarkan Status Transportasi')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='RoomService', y='Total_Spending', hue='Transported', data=df_viz)
+plt.title('Scatter: RoomService vs Total Spending')
+plt.show()
+
+plt.figure(figsize=(14, 10))
+numeric_df = train_df.select_dtypes(include=np.number)
+sns.heatmap(numeric_df.corr(), annot=True, cmap='coolwarm', fmt='.2f')
+plt.title('Heatmap Korelasi')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.histplot(df_viz['Age'], bins=30, kde=True)
+plt.title('Distribusi Usia Penumpang')
+plt.show()
+
+# =====================================
+# BAB 5: Penanganan Outlier
+# =====================================
+data_outlier = pd.DataFrame({'nilai': [10, 12, 14, 16, 11, 15, 13, 100, 105, 98]})
+Q1 = data_outlier['nilai'].quantile(0.25)
+Q3 = data_outlier['nilai'].quantile(0.75)
+IQR = Q3 - Q1
+lower, upper = Q1 - 1.5 * IQR, Q3 + 1.5 * IQR
+
+outliers = data_outlier[(data_outlier['nilai'] < lower) | (data_outlier['nilai'] > upper)]
+print("Outlier terdeteksi:\n", outliers, "\n")
+
+data_outlier['nilai_clipped'] = data_outlier['nilai'].clip(lower, upper)
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+sns.boxplot(y=data_outlier['nilai'], ax=axes[0]).set_title('Sebelum Outlier Handling')
+sns.boxplot(y=data_outlier['nilai_clipped'], ax=axes[1]).set_title('Sesudah Clipping')
+plt.show()
+
+print("✅ Semua tahap pra-pemrosesan dan analisis selesai!\n")

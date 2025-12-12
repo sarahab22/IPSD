@@ -1,0 +1,6 @@
+PassengerId,HomePlanet,CryoSleep,Cabin,Destination,Age,VIP,RoomService,FoodCourt,ShoppingMall,Spa,VRDeck,Name
+0006_01,Earth,False,B/0/P,TRAPPIST-1e,39,False,0,0,0,0,0,Peter Parker
+0007_01,Mars,True,F/33/S,55 Cancri e,24,False,109,9,25,549,44,Bruce Wayne
+0008_01,Europa,False,A/23/S,PSO J318.5-22,58,True,43,357,0,0,0,Clark Kent
+0009_01,Earth,False,G/12/P,TRAPPIST-1e,20,False,0,0,5,0,0,Diana Prince
+0010_01,Mars,True,D/45/S,55 Cancri e,45,False,89,0,10,30,5,Natasha Romanoff
